@@ -61,25 +61,29 @@ namespace WinFormsApp1bottest
                 try
                 {
                     TcpClient sroClient = _proxyListener.AcceptTcpClient();
-                    TcpClient realServer = new TcpClient();
-                   // realServer.Connect("127.0.0.1", 15779); // للربط الفعلي لاحقاً
-                                                            // في دالة ListenForSROClient استبدل سطر الاتصال بهذا:
-                    string remoteIP = "1.2.3.4"; // استبدل هذا بـ IP سيرفرك الحقيقي (وليس 127.0.0.1)
-                    realServer.Connect(remoteIP, 15779);
 
-                    Thread clientToServer = new Thread(() => ProxyDataBridge(sroClient, realServer, "Client -> Server"));
-                    Thread serverToClient = new Thread(() => ProxyDataBridge(realServer, sroClient, "Server -> Client"));
+                    // تهيئة الحماية للطرفين
+                    SecurityManager clientSecurity = new SecurityManager();
+                    SecurityManager serverSecurity = new SecurityManager();
+
+                    TcpClient realServer = new TcpClient();
+                    // تأكد أن هذا الـ IP هو IP سيرفر اللعبة وليس 127.0.0.1
+                    realServer.Connect("IP_REAL_SERVER", 15779);
+
+                    // تمرير كائنات الـ Security للجسر
+                    Thread clientToServer = new Thread(() => ProxyDataBridge(sroClient, realServer, "Client -> Server", clientSecurity));
+                    Thread serverToClient = new Thread(() => ProxyDataBridge(realServer, sroClient, "Server -> Client", serverSecurity));
 
                     clientToServer.IsBackground = true;
-                    serverToClient.IsBackground = true;
-                    clientToServer.Start();
                     serverToClient.Start();
+                    clientToServer.Start();
                 }
-                catch { }
+                catch (Exception ex) { Console.WriteLine(ex.Message); }
+            
             }
         }
 
-        private void ProxyDataBridge(TcpClient source, TcpClient destination, string direction)
+        private void ProxyDataBridge(TcpClient source, TcpClient destination, string direction, SecurityManager clientSecurity)
         {
             try
             {
