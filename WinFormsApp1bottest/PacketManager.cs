@@ -10,7 +10,9 @@ namespace WinFormsApp1bottest
     public class PacketManager
     {
         // سوف نقوم بإضافة كلاس startProxy 
-        private TcpListener _proxyListener;
+        private TcpListener? _proxyListener = null; // أضف = null لحل التحذير 
+        // حالة البروكسي (يعمل/متوقف)
+        // تم اضافة علامة ؟  لتمكين القيمة من ان تكون فارغة في حالة عدم التهيئة في سطر 13
         private bool _isProxyRunning = false;
 
         public void StartProxy(int localPort)
@@ -42,7 +44,7 @@ namespace WinFormsApp1bottest
                 try
                 {
                     // البوت هنا في حالة "انتظار" لاتصال sro_client.exe
-                    TcpClient clientSocket = _proxyListener.AcceptTcpClient();
+                    TcpClient clientSocket = _proxyListener.AcceptTcpClient();// انتظار اتصال اللعبة
                     Console.WriteLine("تم اتصال اللعبة بالبوت بنجاح!");
 
                     // هنا سنضع مستقبلاً كود الـ Bridge (الجسر) لنقل البيانات للسيرفر
