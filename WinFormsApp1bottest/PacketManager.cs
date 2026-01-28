@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
 
 namespace WinFormsApp1bottest
 {
@@ -43,6 +46,12 @@ namespace WinFormsApp1bottest
                     // منطق عرض الشخصيات في البوت
                     break;
             }
+        }//end method ProcessIncomingPacket
+        public void StartProxy(string serverIp, int port)
+        {
+            // البوت يبدأ في التنصت على الجهاز المحلي
+            // Local Host: 127.0.0.1
+            Console.WriteLine($"جاري تشغيل البروكسي على IP: {serverIp} بورت: {port}");
         }
-    }
+    }//end class PacketManager
 }
