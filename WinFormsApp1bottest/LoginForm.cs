@@ -48,6 +48,8 @@ namespace WinFormsApp1bottest
             {
                 MessageBox.Show("فشل في تجهيز بيانات الدخول!");
             }
+            PacketManager pm = new PacketManager();
+            pm.StartProxy(15779); // 15779 هو البورت الافتراضي لسيلكرود
         }
     }
 }

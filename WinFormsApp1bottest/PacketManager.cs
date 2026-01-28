@@ -9,6 +9,47 @@ namespace WinFormsApp1bottest
 {
     public class PacketManager
     {
+        // سوف نقوم بإضافة كلاس startProxy 
+        private TcpListener _proxyListener;
+        private bool _isProxyRunning = false;
+
+        public void StartProxy(int localPort)
+        {
+            try
+            {
+                // 1. إعداد البروكسي ليسمع على جهازك المحلي (IP: 127.0.0.1)
+                _proxyListener = new TcpListener(IPAddress.Loopback, localPort);
+                _proxyListener.Start();
+                _isProxyRunning = true;
+
+                // 2. تشغيل "خيط" منفصل لانتظار اللعبة حتى لا يتجمد البوت
+                Thread listenThread = new Thread(ListenForSROClient);
+                listenThread.IsBackground = true; // لكي يغلق مع إغلاق البوت
+                listenThread.Start();
+
+                Console.WriteLine($"[G-BOT] البروكسي يعمل الآن على البورت: {localPort}");
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("فشل تشغيل البروكسي: " + ex.Message);
+            }
+        }
+
+        private void ListenForSROClient()
+        {
+            while (_isProxyRunning)
+            {
+                try
+                {
+                    // البوت هنا في حالة "انتظار" لاتصال sro_client.exe
+                    TcpClient clientSocket = _proxyListener.AcceptTcpClient();
+                    Console.WriteLine("تم اتصال اللعبة بالبوت بنجاح!");
+
+                    // هنا سنضع مستقبلاً كود الـ Bridge (الجسر) لنقل البيانات للسيرفر
+                }
+                catch { /* في حالة إغلاق البروكسي */ }
+            }
+        }
         // تعريف الأكواد الأساسية (Opcodes) المستخرجة من nBot/mBot
         public static class Opcodes
         {
