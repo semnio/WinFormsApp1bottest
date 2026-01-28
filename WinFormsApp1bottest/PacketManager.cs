@@ -120,11 +120,33 @@ namespace WinFormsApp1bottest
             // دالة مبدئية لطباعة حجم البيانات (Packet Logging)
             // سنقوم هنا لاحقاً بفك التشفير باستخدام SecurityManager
             //Console.WriteLine($"[{direction}] Packet Size: {length} bytes");
-            string hexData = BitConverter.ToString(data, 0, length).Replace("-", " ");
-            string logMessage = $"[{direction}] Size: {length} | Data: {hexData}";
+            //string hexData = BitConverter.ToString(data, 0, length).Replace("-", " ");
+            // string logMessage = $"[{direction}] Size: {length} | Data: {hexData}";
 
             // إرسال البيانات للواجهة
-            OnPacketReceived?.Invoke(logMessage);
+            //  OnPacketReceived?.Invoke(logMessage);
+            try
+            {
+                // 1. تحويل البيانات الخام إلى "باكت" يمكن التعامل معه
+                // (مستقبلاً سنستخدم SecurityManager هنا لفك Blowfish)
+
+                string hexData = BitConverter.ToString(data, 0, length).Replace("-", " ");
+
+                // 2. البحث عن الأكواد المشهورة (Opcodes)
+                if (hexData.Contains("02 61")) // مثال لباكت الدخول
+                {
+                    OnPacketReceived?.Invoke($"[LOGIN ATTEMPT] {direction}");
+                }
+
+                string logMessage = $"[{direction}] Op: {length} | {hexData}";
+
+                // إرسال البيانات لشاشة الـ Log في Form1
+                OnPacketReceived?.Invoke(logMessage);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error in Decryption: " + ex.Message);
+            }
         }
 
         public void StopProxy()
