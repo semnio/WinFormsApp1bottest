@@ -34,6 +34,7 @@ namespace WinFormsApp1bottest
 
             // استدعاء محرك الباكتات الذي أنشأناه
             PacketManager pm = new PacketManager();
+            pm.StartProxy(15779); // 15779 هو البورت الافتراضي لسيلكرود
 
             // محاكاة إرسال باكت الدخول (هنا يبدأ شغل الـ Silkroad الحقيقي)
             byte[] loginPacket = pm.CreateLoginPacket(user, pass);
@@ -49,7 +50,6 @@ namespace WinFormsApp1bottest
                 MessageBox.Show("فشل في تجهيز بيانات الدخول!");
             }
             //PacketManager pm = new PacketManager(); لانها موجودة فوق سطر 36 
-            pm.StartProxy(15779); // 15779 هو البورت الافتراضي لسيلكرود
         }
     }
 }
