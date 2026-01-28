@@ -56,7 +56,7 @@
             label6 = new Label();
             label7 = new Label();
             groupBox3 = new GroupBox();
-            listBoxLogs1 = new ListBox();
+            lstLog = new ListBox();
             progressBar3 = new ProgressBar();
             progressBar2 = new ProgressBar();
             progressBar1 = new ProgressBar();
@@ -383,7 +383,7 @@
             // 
             // groupBox3
             // 
-            groupBox3.Controls.Add(listBoxLogs1);
+            groupBox3.Controls.Add(lstLog);
             groupBox3.Controls.Add(progressBar3);
             groupBox3.Controls.Add(progressBar2);
             groupBox3.Controls.Add(progressBar1);
@@ -413,13 +413,14 @@
             groupBox3.Text = "Character info";
             groupBox3.Enter += groupBox3_Enter;
             // 
-            // listBoxLogs1
+            // lstLog
             // 
-            listBoxLogs1.FormattingEnabled = true;
-            listBoxLogs1.Location = new Point(482, 46);
-            listBoxLogs1.Name = "listBoxLogs1";
-            listBoxLogs1.Size = new Size(268, 172);
-            listBoxLogs1.TabIndex = 39;
+            lstLog.FormattingEnabled = true;
+            lstLog.Location = new Point(309, 46);
+            lstLog.Name = "lstLog";
+            lstLog.Size = new Size(495, 172);
+            lstLog.TabIndex = 39;
+            lstLog.SelectedIndexChanged += listBoxLogs1_SelectedIndexChanged;
             // 
             // progressBar3
             // 
@@ -1249,6 +1250,6 @@
         private ProgressBar progressBar1;
         private OpenFileDialog openFileDialog1;
         private FolderBrowserDialog folderBrowserDialog1;
-        private ListBox listBoxLogs1;
+        private ListBox lstLog;
     }
 }

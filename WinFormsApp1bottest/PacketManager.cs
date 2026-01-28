@@ -9,6 +9,7 @@ namespace WinFormsApp1bottest
 {
     public class PacketManager
     {
+        public static Action<string> OnPacketReceived;
         // 1. تعريف الأكواد الأساسية (Opcodes) المستخرجة من المشاريع السابقة
         public static class Opcodes
         {
@@ -118,7 +119,12 @@ namespace WinFormsApp1bottest
         {
             // دالة مبدئية لطباعة حجم البيانات (Packet Logging)
             // سنقوم هنا لاحقاً بفك التشفير باستخدام SecurityManager
-            Console.WriteLine($"[{direction}] Packet Size: {length} bytes");
+            //Console.WriteLine($"[{direction}] Packet Size: {length} bytes");
+            string hexData = BitConverter.ToString(data, 0, length).Replace("-", " ");
+            string logMessage = $"[{direction}] Size: {length} | Data: {hexData}";
+
+            // إرسال البيانات للواجهة
+            OnPacketReceived?.Invoke(logMessage);
         }
 
         public void StopProxy()

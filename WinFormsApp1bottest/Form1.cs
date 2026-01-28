@@ -5,6 +5,12 @@
         public Form1()
         {
             InitializeComponent();
+            // استقبال البيانات من البروكسي وعرضها
+            PacketManager.OnPacketReceived += (message) => {
+                this.Invoke(new MethodInvoker(() => {
+                    lstLog.Items.Insert(0, message); // إضافة أحدث باكت في الأعلى
+                }));
+            };
         }
 
         private void toolStripMenuItem2_Click(object sender, EventArgs e)
@@ -54,7 +60,7 @@
                 File.WriteAllText("settings.json", jsonContent);
 
                 // إضافة رسالة في الـ Logs الخاصة بواجهتك
-                listBoxLogs1.Items.Add("[" + DateTime.Now.ToString("HH:mm") + "] تم حفظ مسار اللعبة بنجاح.");
+                lstLog.Items.Add("[" + DateTime.Now.ToString("HH:mm") + "] تم حفظ مسار اللعبة بنجاح.");
             }
             catch (Exception ex)
             {
@@ -100,6 +106,11 @@
 
                 MessageBox.Show("تم تحديد مجلد اللعبة بنجاح: " + sroPath);
             }
+        }
+
+        private void listBoxLogs1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
