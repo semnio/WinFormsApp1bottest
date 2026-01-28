@@ -41,16 +41,59 @@ namespace WinFormsApp1bottest
         {
             while (_isProxyRunning)
             {
+                // انتظار اتصال اللعبة
                 try
                 {
-                    // البوت هنا في حالة "انتظار" لاتصال sro_client.exe
-                    TcpClient clientSocket = _proxyListener.AcceptTcpClient();// انتظار اتصال اللعبة
-                    Console.WriteLine("تم اتصال اللعبة بالبوت بنجاح!");
+                    // 1. استقبال اتصال اللعبة
+                    TcpClient sroClient = _proxyListener.AcceptTcpClient();
+                    Console.WriteLine("اللعبة اتصلت بالبوت!");
 
-                    // هنا سنضع مستقبلاً كود الـ Bridge (الجسر) لنقل البيانات للسيرفر
+                    // 2. الاتصال بسيرفر اللعبة الحقيقي (استبدل IP السيرفر هنا)
+                    string realServerIP = "12.34.56.78"; // ضع هنا IP السيرفر الخاص بك
+                    int realServerPort = 15779;
+                    TcpClient realServer = new TcpClient(realServerIP, realServerPort);
+
+                    // 3. تشغيل الجسر لنقل البيانات في الاتجاهين
+                    Thread clientToServer = new Thread(() => ProxyDataBridge(sroClient, realServer, "Client -> Server"));
+                    Thread serverToClient = new Thread(() => ProxyDataBridge(realServer, sroClient, "Server -> Client"));
+
+                    clientToServer.Start();
+                    serverToClient.Start();
                 }
-                catch { /* في حالة إغلاق البروكسي */ }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("خطأ في الجسر: " + ex.Message);
+                }
+                private void ProxyDataBridge(TcpClient source, TcpClient destination, string direction)
+        {
+            NetworkStream sourceStream = source.GetStream();
+            NetworkStream destStream = destination.GetStream();
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+
+            try
+            {
+                while ((bytesRead = sourceStream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    // هنا يحدث السحر: يمكنك رؤية الباكتات قبل إرسالها!
+                    // سنقوم لاحقاً بإضافة ProcessIncomingPacket هنا للتحليل
+
+                    destStream.Write(buffer, 0, bytesRead);
+                }
             }
+            catch { /* الاتصال قطع */ }
+        }
+        // try
+        //{
+        // البوت هنا في حالة "انتظار" لاتصال sro_client.exe
+        //    TcpClient clientSocket = _proxyListener.AcceptTcpClient();// انتظار اتصال اللعبة
+        //    Console.WriteLine("تم اتصال اللعبة بالبوت بنجاح!");
+        //
+        //    // هنا سنضع مستقبلاً كود الـ Bridge (الجسر) لنقل البيانات للسيرفر
+        // }
+        // catch { /* في حالة إغلاق البروكسي */ };
+    }//end method ListenForSROClient 
+
         }
         // تعريف الأكواد الأساسية (Opcodes) المستخرجة من nBot/mBot
         public static class Opcodes

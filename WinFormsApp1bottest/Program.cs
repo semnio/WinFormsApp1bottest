@@ -15,7 +15,7 @@
             ApplicationConfiguration.Initialize();
             Application.Run(new LoginForm());
             Application.EnableVisualStyles(); 
-            Application.SetCompatibleTextRenderingDefault(false);
+            //Application.SetCompatibleTextRenderingDefault(false);
 
             // نفتح شاشة اللوجن أولاً
             LoginForm login = new LoginForm();
