@@ -62,7 +62,10 @@ namespace WinFormsApp1bottest
                 {
                     TcpClient sroClient = _proxyListener.AcceptTcpClient();
                     TcpClient realServer = new TcpClient();
-                    // realServer.Connect("127.0.0.1", 15779); // للربط الفعلي لاحقاً
+                   // realServer.Connect("127.0.0.1", 15779); // للربط الفعلي لاحقاً
+                                                            // في دالة ListenForSROClient استبدل سطر الاتصال بهذا:
+                    string remoteIP = "1.2.3.4"; // استبدل هذا بـ IP سيرفرك الحقيقي (وليس 127.0.0.1)
+                    realServer.Connect(remoteIP, 15779);
 
                     Thread clientToServer = new Thread(() => ProxyDataBridge(sroClient, realServer, "Client -> Server"));
                     Thread serverToClient = new Thread(() => ProxyDataBridge(realServer, sroClient, "Server -> Client"));
