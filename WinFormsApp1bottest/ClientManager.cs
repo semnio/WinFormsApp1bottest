@@ -40,7 +40,7 @@ namespace WinFormsApp1bottest
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error: " + ex.Message);Console.WriteLine(ex.ToString());
+                Console.WriteLine("Error: " + ex.Message);
                 System.Windows.Forms.MessageBox.Show("خطأ في تشغيل اللعبة: " + ex.Message);
             }
         }

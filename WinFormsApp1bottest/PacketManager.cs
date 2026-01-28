@@ -9,8 +9,7 @@ namespace WinFormsApp1bottest
 {
     public class PacketManager
     {
-        public static Action<string> OnPacketReceived;
-        // 1. تعريف الأكواد الأساسية (Opcodes) المستخرجة من المشاريع السابقة
+        // 1. تعريف الأكواد الأساسية (Opcodes)
         public static class Opcodes
         {
             public const ushort CLIENT_VERSION = 0x2001;
@@ -18,26 +17,29 @@ namespace WinFormsApp1bottest
             public const ushort CLIENT_CHARACTER_SELECTION_ACTION = 0x7001;
             public const ushort CLIENT_MOVEMENT_REQUEST = 0x7021;
             public const ushort CLIENT_CHAT_REQUEST = 0x7025;
-
+            public const ushort SERVER_HP_MP_UPDATE = 0x3013;
             public const ushort SERVER_LOGIN_RESPONSE = 0xA102;
             public const ushort SERVER_CHARACTER_LIST = 0xB007;
         }
 
-        // 2. متغيرات التحكم في البروكسي والربط
         private TcpListener _proxyListener = null;
         private bool _isProxyRunning = false;
-        private string _realServerIP = "127.0.0.1"; // سيتم تحديثه لاحقاً بـ IP السيرفر الحقيقي
-        private int _port = 15779;
+        public static Action<string> OnPacketReceived;
+        private SecurityManager _security = new SecurityManager();
 
-        /// <summary>
-        /// تشغيل البروكسي لفتح بوابة بين اللعبة والبوت
-        /// </summary>
+        // --- الدالة التي كانت تسبب الخطأ (تمت إعادتها) ---
+        public byte[] CreateLoginPacket(string username, string password)
+        {
+            // مؤقتاً نعيد مصفوفة فارغة حتى نربط التشفير لاحقاً
+            return new byte[] { 0x00 };
+        }
+        // -----------------------------------------------
+
         public void StartProxy(int localPort)
         {
             try
             {
                 if (_isProxyRunning) return;
-
                 _proxyListener = new TcpListener(IPAddress.Loopback, localPort);
                 _proxyListener.Start();
                 _isProxyRunning = true;
@@ -45,12 +47,10 @@ namespace WinFormsApp1bottest
                 Thread listenThread = new Thread(ListenForSROClient);
                 listenThread.IsBackground = true;
                 listenThread.Start();
-
-                Console.WriteLine($"[G-BOT] Proxy started on port: {localPort}");
             }
             catch (Exception ex)
             {
-                MessageBox.Show("خطأ في تشغيل البروكسي: " + ex.Message);
+                MessageBox.Show("Proxy Error: " + ex.Message);
             }
         }
 
@@ -60,29 +60,19 @@ namespace WinFormsApp1bottest
             {
                 try
                 {
-                    // استقبال اتصال اللعبة (sro_client)
                     TcpClient sroClient = _proxyListener.AcceptTcpClient();
-                    Console.WriteLine("SRO Client Connected to G-BOT!");
-
-                    // الاتصال بسيرفر سيلكرود الحقيقي (هنا يجب وضع IP السيرفر الحقيقي)
                     TcpClient realServer = new TcpClient();
-                    // ملاحظة: إذا كنت تختبر محلياً اتركها 127.0.0.1 ولكن بورت مختلف
-                    // realServer.Connect(_realServerIP, _port); 
+                    // realServer.Connect("127.0.0.1", 15779); // للربط الفعلي لاحقاً
 
-                    // تشغيل الجسر (Bridge) لنقل البيانات
                     Thread clientToServer = new Thread(() => ProxyDataBridge(sroClient, realServer, "Client -> Server"));
                     Thread serverToClient = new Thread(() => ProxyDataBridge(realServer, sroClient, "Server -> Client"));
 
                     clientToServer.IsBackground = true;
                     serverToClient.IsBackground = true;
-
                     clientToServer.Start();
                     serverToClient.Start();
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Connection Error: " + ex.Message);
-                }
+                catch { }
             }
         }
 
@@ -92,22 +82,16 @@ namespace WinFormsApp1bottest
             {
                 NetworkStream sourceStream = source.GetStream();
                 NetworkStream destStream = destination.GetStream();
-                byte[] buffer = new byte[8192]; // زيادة حجم البفر لتحسين الأداء
+                byte[] buffer = new byte[8192];
                 int bytesRead;
 
                 while (source.Connected && (bytesRead = sourceStream.Read(buffer, 0, buffer.Length)) > 0)
                 {
-                    // تحليل البيانات (هنا سيتم إضافة نظام الـ Ai والـ Log لاحقاً)
                     ProcessData(buffer, bytesRead, direction);
-
-                    // تمرير البيانات للطرف الآخر
-                    if (destination.Connected)
-                    {
-                        destStream.Write(buffer, 0, bytesRead);
-                    }
+                    if (destination.Connected) destStream.Write(buffer, 0, bytesRead);
                 }
             }
-            catch { /* إغلاق صامت عند قطع الاتصال */ }
+            catch { }
             finally
             {
                 source.Close();
@@ -117,42 +101,15 @@ namespace WinFormsApp1bottest
 
         private void ProcessData(byte[] data, int length, string direction)
         {
-            // دالة مبدئية لطباعة حجم البيانات (Packet Logging)
-            // سنقوم هنا لاحقاً بفك التشفير باستخدام SecurityManager
-            //Console.WriteLine($"[{direction}] Packet Size: {length} bytes");
-            //string hexData = BitConverter.ToString(data, 0, length).Replace("-", " ");
-            // string logMessage = $"[{direction}] Size: {length} | Data: {hexData}";
-
-            // إرسال البيانات للواجهة
-            //  OnPacketReceived?.Invoke(logMessage);
             try
             {
-                // 1. تحويل البيانات الخام إلى "باكت" يمكن التعامل معه
-                // (مستقبلاً سنستخدم SecurityManager هنا لفك Blowfish)
-
                 string hexData = BitConverter.ToString(data, 0, length).Replace("-", " ");
-
-                // 2. البحث عن الأكواد المشهورة (Opcodes)
-                if (hexData.Contains("02 61")) // مثال لباكت الدخول
-                {
-                    OnPacketReceived?.Invoke($"[LOGIN ATTEMPT] {direction}");
-                }
-
-                string logMessage = $"[{direction}] Op: {length} | {hexData}";
-
-                // إرسال البيانات لشاشة الـ Log في Form1
-                OnPacketReceived?.Invoke(logMessage);
+                if (hexData.Contains("13 30")) OnPacketReceived?.Invoke($"[STAT] HP/MP Update Detected");
+                OnPacketReceived?.Invoke($"[{direction}] {hexData}");
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error in Decryption: " + ex.Message);
-            }
+            catch { }
         }
 
-        public void StopProxy()
-        {
-            _isProxyRunning = false;
-            _proxyListener?.Stop();
-        }
+        public void StopProxy() => _isProxyRunning = false;
     }
 }

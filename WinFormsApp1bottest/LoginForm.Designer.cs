@@ -43,6 +43,7 @@
             txtUser.Name = "txtUser";
             txtUser.Size = new Size(163, 25);
             txtUser.TabIndex = 0;
+            txtUser.Text = "admin";
             // 
             // label1
             // 
@@ -68,6 +69,7 @@
             txtPass.Name = "txtPass";
             txtPass.Size = new Size(163, 25);
             txtPass.TabIndex = 2;
+            txtPass.Text = "123";
             // 
             // button1
             // 
