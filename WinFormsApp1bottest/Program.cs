@@ -1,4 +1,4 @@
-namespace WinFormsApp1bottest
+﻿namespace WinFormsApp1bottest
 {
     internal static class Program
     {
@@ -11,7 +11,18 @@ namespace WinFormsApp1bottest
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+            Application.Run(new LoginForm());
+            Application.EnableVisualStyles();
+            //Application.SetCompatibleTextRenderingDefault(false);
+
+            // نفتح شاشة اللوجن أولاً
+            LoginForm login = new LoginForm();
+
+            if (login.ShowDialog() == DialogResult.OK)
+            {
+                // إذا نجح اللوجن، نفتح واجهة البوت الرئيسية
+                Application.Run(new Form1());
+            }
         }
     }
 }
